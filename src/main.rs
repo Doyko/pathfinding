@@ -176,18 +176,16 @@ fn breath(map: &mut Map) -> (u32, u32) {
         let current = queue.pop_front().unwrap();
 
         if current == map.end {
-            match map.map.get(current.x + map.width * current.y).unwrap() {
-                Elem::Uncheck(n) => len = *n,
-                _ => (),
-            };
+            if let Elem::Uncheck(n) = map.map.get(current.x + map.width * current.y).unwrap() {
+                len = *n;
+            }
             map.map[current.x + map.width * current.y] = Elem::End;
             break;
         }
 
-        match map.map.get(current.x + map.width * current.y).unwrap() {
-            Elem::Uncheck(n) => map.map[current.x + map.width * current.y] = Elem::Check(*n),
-            _ => (),
-        };
+        if let Elem::Uncheck(n) = map.map.get(current.x + map.width * current.y).unwrap() {
+            map.map[current.x + map.width * current.y] = Elem::Check(*n);
+        }
 
         for n in get_neighbors(&current, map) {
             let elem = map.map.get(n.x + map.width * n.y).unwrap();
@@ -197,9 +195,10 @@ fn breath(map: &mut Map) -> (u32, u32) {
             }
 
             map.map[n.x + map.width * n.y] = Elem::Uncheck(
-                match map.map.get(current.x + map.width * current.y).unwrap() {
-                    Elem::Check(n) => n + 1,
-                    _ => 1,
+                if let Elem::Check(n) = map.map.get(current.x + map.width * current.y).unwrap() {
+                    n + 1
+                } else {
+                    1
                 },
             );
             queue.push_back(n);
@@ -230,18 +229,16 @@ fn heuristic(map: &mut Map) -> (u32, u32) {
         let current = vec.pop().unwrap();
 
         if current == map.end {
-            match map.map.get(current.x + map.width * current.y).unwrap() {
-                Elem::Uncheck(n) => len = *n,
-                _ => (),
-            };
+            if let Elem::Uncheck(n) = map.map.get(current.x + map.width * current.y).unwrap() {
+                len = *n;
+            }
             map.map[current.x + map.width * current.y] = Elem::End;
             break;
         }
 
-        match map.map.get(current.x + map.width * current.y).unwrap() {
-            Elem::Uncheck(n) => map.map[current.x + map.width * current.y] = Elem::Check(*n),
-            _ => (),
-        };
+        if let Elem::Uncheck(n) = map.map.get(current.x + map.width * current.y).unwrap() {
+            map.map[current.x + map.width * current.y] = Elem::Check(*n);
+        }
 
         for n in get_neighbors(&current, map) {
             let elem = map.map.get(n.x + map.width * n.y).unwrap();
@@ -251,9 +248,10 @@ fn heuristic(map: &mut Map) -> (u32, u32) {
             }
 
             map.map[n.x + map.width * n.y] = Elem::Uncheck(
-                match map.map.get(current.x + map.width * current.y).unwrap() {
-                    Elem::Check(n) => n + 1,
-                    _ => 1,
+                if let Elem::Check(n) = map.map.get(current.x + map.width * current.y).unwrap() {
+                    n + 1
+                } else {
+                    1
                 },
             );
             vec.push(n);
@@ -280,14 +278,16 @@ fn astar(map: &mut Map) -> (u32, u32) {
     while !vec.is_empty() {
         step += 1;
         vec.sort_by(|a, b| {
-            (match map.map.get(b.x + map.width * b.y).unwrap() {
-                Elem::Uncheck(n) => *n,
-                _ => 0,
+            (if let Elem::Uncheck(n) = map.map.get(b.x + map.width * b.y).unwrap() {
+                n
+            } else {
+                &0
             } + dist(*b, map.end))
             .partial_cmp(
-                &(match map.map.get(a.x + map.width * a.y).unwrap() {
-                    Elem::Uncheck(n) => *n,
-                    _ => 0,
+                &(if let Elem::Uncheck(n) = map.map.get(a.x + map.width * a.y).unwrap() {
+                    n
+                } else {
+                    &0
                 } + &dist(*a, map.end)),
             )
             .unwrap()
@@ -295,18 +295,16 @@ fn astar(map: &mut Map) -> (u32, u32) {
         let current = vec.pop().unwrap();
 
         if current == map.end {
-            match map.map.get(current.x + map.width * current.y).unwrap() {
-                Elem::Uncheck(n) => len = *n,
-                _ => (),
-            };
+            if let Elem::Uncheck(n) = map.map.get(current.x + map.width * current.y).unwrap() {
+                len = *n;
+            }
             map.map[current.x + map.width * current.y] = Elem::End;
             break;
         }
 
-        match map.map.get(current.x + map.width * current.y).unwrap() {
-            Elem::Uncheck(n) => map.map[current.x + map.width * current.y] = Elem::Check(*n),
-            _ => (),
-        };
+        if let Elem::Uncheck(n) = map.map.get(current.x + map.width * current.y).unwrap() {
+            map.map[current.x + map.width * current.y] = Elem::Check(*n);
+        }
 
         for n in get_neighbors(&current, map) {
             let elem = map.map.get(n.x + map.width * n.y).unwrap();
@@ -314,9 +312,11 @@ fn astar(map: &mut Map) -> (u32, u32) {
             if match &elem {
                 Elem::Uncheck(0) => false,
                 Elem::Uncheck(cn) => {
-                    match map.map.get(current.x + map.width * current.y).unwrap() {
-                        Elem::Check(cc) => *cn < cc + 1,
-                        _ => true,
+                    if let Elem::Check(cc) = map.map.get(current.x + map.width * current.y).unwrap()
+                    {
+                        *cn < cc + 1
+                    } else {
+                        true
                     }
                 }
                 Elem::End => false,
@@ -326,9 +326,10 @@ fn astar(map: &mut Map) -> (u32, u32) {
             }
 
             map.map[n.x + map.width * n.y] = Elem::Uncheck(
-                match map.map.get(current.x + map.width * current.y).unwrap() {
-                    Elem::Check(n) => n + 1,
-                    _ => 1,
+                if let Elem::Check(n) = map.map.get(current.x + map.width * current.y).unwrap() {
+                    n + 1
+                } else {
+                    1
                 },
             );
             vec.retain(|&e| e != n);
